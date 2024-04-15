@@ -23,12 +23,29 @@ def clean_and_merge_txt_files(file_paths, output_file_path):
             except Exception as e:
                 print(f"Ein Fehler ist bei der Verarbeitung der Datei {file_path} aufgetreten: {e}")
 
+
+def remove_specific_sentence(file_path, sentence_to_remove):
+    # Öffnen der Datei und Einlesen des Inhalts
+    with open(file_path, 'r', encoding='utf-8') as file:
+        lines = file.readlines()
+
+    # Entfernen des spezifischen Satzes aus jeder Zeile
+    with open(file_path, 'w', encoding='utf-8') as file:
+        for line in lines:
+            # Entfernen des Satzes, falls vorhanden und Zeilenumbruch hinzufügen, wenn die Zeile nicht leer ist
+            updated_line = line.replace(sentence_to_remove, '')
+            if updated_line.strip():
+                file.write(updated_line)
+
+# Anwendung der Funktion auf eine spezifische Datei
+
+
 def start():
     # Beispiel für die Verwendung der Funktion
-    file_paths = ['data/Zusammengefasste_Inhalte_Bilanzierung.txt', 'data/Zusammengefasste_Inhalte_Finanzwissen.txt', 'data/Zusammengefasste_Inhalte_Investitionsrechnung.txt', 'data/Zusammengefasste_Inhalte_Kostenrechnung.txt',
-                  'data/Zusammengefasste_Inhalte_Unternehmensziele.txt','data/Zusammengefasste_Inhalte_Wirtschaftsrecht.txt']
-    output_file_path = 'data/lernpakete.txt'
-    clean_and_merge_txt_files(file_paths, output_file_path)
+  #  file_paths = ['data/Zusammengefasste_Inhalte_Bilanzierung.txt']
+  #  output_file_path = 'data/bilanzierung.txt'
+  #  clean_and_merge_txt_files(file_paths, output_file_path)
+    remove_specific_sentence('data/bilanzierung.txt', 'Keine Antwort ist richtig.')
 
 
 if __name__ == '__main__':

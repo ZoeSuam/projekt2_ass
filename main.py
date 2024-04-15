@@ -37,44 +37,36 @@ def start_conversation():
 # Generate response
 @app.route('/chat', methods=['POST'])
 def chat():
-  data = request.json
-  thread_id = data.get('thread_id')
-  user_input = data.get('message', '')
+    data = request.json
+    thread_id = data.get('thread_id')
+    user_input = data.get('message', '')
+    lesson_choice = data.get('lesson_choice', '')
 
-  if not thread_id:
-    print("Error: Missing thread_id")  # Debugging line
-    return jsonify({"error": "Missing thread_id"}), 400
+    if not thread_id:
+        print("Error: Missing thread_id")
+        return jsonify({"error": "Missing thread_id"}), 400
 
-  print(f"Received message: {user_input} for thread ID: {thread_id}"
-        )  # Debugging line
+    # Bestimmung des Dokuments basierend auf der lesson_choice
+    if lesson_choice and not user_input:
+        # Erster Aufruf: Auswahl des Dokuments
+        document_path = functions.select_document(lesson_choice)
+        print(f"Selected document for lesson {lesson_choice}: {document_path}")
+        response_text = f"What is your question regarding {document_path.split('/')[-1]}?"
+        return jsonify({"response": response_text})
 
-  # Add the user's message to the thread
-  client.beta.threads.messages.create(thread_id=thread_id,
-                                      role="user",
-                                      content=user_input)
+    elif user_input and lesson_choice:
+        # Zweiter Aufruf: Verarbeitung der Nutzeranfrage
+        document_path = functions.select_document(lesson_choice)  # Sicherstellen, dass das korrekte Dokument verwendet wird
+        # Hier sollte eine Logik implementiert sein, die die Anfrage im Dokument verarbeitet
+        # (Beispielhaft, dies sollte durch tatsächliche Logik zur Dokumentsuche ersetzt werden)
+        response_text = f"Based on {document_path}, here is the information regarding '{user_input}'."
+        return jsonify({"response": response_text})
 
-  # Run the Assistant
-  run = client.beta.threads.runs.create(thread_id=thread_id,
-                                        assistant_id=assistant_id)
+    return jsonify({"error": "Required data is missing"})
 
-  # Check if the Run requires action (function call)
-  while True:
-    run_status = client.beta.threads.runs.retrieve(thread_id=thread_id,
-                                                   run_id=run.id)
-    print(f"Run status: {run_status.status}")
-    if run_status.status == 'completed':
-      break
-    sleep(1)  # Wait for a second before checking again
 
-  # Retrieve and return the latest message from the assistant
-  messages = client.beta.threads.messages.list(thread_id=thread_id)
-  response = messages.data[0].content[0].text.value
-
-  print(f"Assistant response: {response}")  # Debugging line
-  return jsonify({"response": response})
-
-# Run server
 if __name__ == '__main__':
-  app.run(host='0.0.0.0', port=8080)
+    app.run(host='0.0.0.0', port=8080)
+
 
 
